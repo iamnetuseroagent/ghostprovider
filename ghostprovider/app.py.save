@@ -1,0 +1,335 @@
+"""GhostProvider — cyberpunk 2077 themed TUI application."""
+
+from textual.app import App, Binding
+
+from ghostprovider.screens import (
+    MainScreen, AnalysisScreen, GithubScreen,
+    RepoResultScreen, HostingScreen, ServiceListScreen,
+)
+
+CYBERPUNK_CSS = """
+Screen {
+    background: #0a0000;
+}
+
+Vertical {
+    align: center middle;
+}
+
+Center {
+    align: center middle;
+    width: 100%;
+}
+
+
+Static {
+    color: #cc0000;
+}
+
+Button {
+    background: #1a0000;
+    color: #ffcc00;
+    border: tall #cc0000;
+    padding: 1 4;
+    min-width: 26;
+    text-align: center;
+}
+
+Button:hover {
+    background: #cc0000;
+    color: #000000;
+    border: tall #ffcc00;
+}
+
+Button:focus {
+    background: #cc0000;
+    color: #000000;
+    border: tall #ffcc00;
+}
+
+Button.-primary {
+    background: #cc0000;
+    color: #ffcc00;
+    border: tall #ffcc00;
+}
+
+Button.-primary:hover {
+    background: #ffcc00;
+    color: #000000;
+    border: tall #cc0000;
+}
+
+Button.-primary:focus {
+    background: #ffcc00;
+    color: #000000;
+    border: tall #cc0000;
+}
+
+Input {
+    background: #0d0000;
+    color: #ff3333;
+    border: tall #cc0000;
+    padding: 0 2;
+}
+
+Input:focus {
+    border: tall #ffcc00;
+}
+
+RichLog {
+    background: #0a0000;
+    color: #cc0000;
+    border: none;
+    padding: 1;
+    margin: 0 2;
+}
+
+ProgressBar {
+    background: #0a0000;
+    color: #cc0000;
+    border: none;
+}
+
+ProgressBar > .bar {
+    background: #1a0000;
+}
+
+ProgressBar > .bar > .complete {
+    background: #cc0000;
+}
+
+ProgressBar > .bar > .remaining {
+    background: #1a0000;
+}
+
+Header {
+    background: #0a0000;
+    color: #ffcc00;
+}
+
+Footer {
+    background: #0a0000;
+    color: #660000;
+}
+
+Scrollbar {
+    background: #1a0000;
+}
+
+Scrollbar > .thumb {
+    background: #cc0000;
+}
+
+ListView {
+    background: #0a0000;
+    border: none;
+}
+
+ListView > ListItem {
+    background: #0a0000;
+    padding: 0 1;
+    height: 3;
+}
+
+ListView > ListItem.--highlight {
+    background: #2a0000;
+}
+
+ListView > ListItem > Horizontal {
+    width: 100%;
+}
+
+#description {
+    align: center middle;
+    text-align: center;
+    padding: 0 2;
+}
+
+#hint {
+    align: center middle;
+    color: #660000;
+    margin: 1 0;
+}
+
+#btn-analyze {
+    align: center middle;
+    margin: 1 0;
+}
+
+BootSequence {
+    width: 100%;
+    height: 100%;
+}
+
+#github-title,
+#result-title,
+#host-title,
+#services-title {
+    align: center top;
+    padding: 1 0;
+    text-align: center;
+}
+
+#result-log,
+#host-log {
+    height: 14;
+}
+
+#host-progress {
+    margin: 0 4;
+}
+
+#github-desc {
+    align: center middle;
+    text-align: center;
+    padding: 0 2;
+}
+
+#github-input {
+    margin: 0 4;
+}
+
+#github-hint {
+    align: center middle;
+    color: #660000;
+    margin: 1 0;
+}
+
+#result-actions {
+    align: center middle;
+    margin: 1 0;
+}
+
+#modal-msg {
+    align: center middle;
+    text-align: center;
+    padding: 2;
+    background: #0d0000;
+    border: tall #cc0000;
+    margin: 2 4;
+}
+
+#modal-buttons {
+    align: center middle;
+    margin: 1 0;
+}
+
+#services-hint {
+    align: center middle;
+    color: #660000;
+    margin: 1 0;
+}
+
+#services-list {
+    margin: 0 2;
+    height: 1fr;
+}
+
+/* ── Row ── */
+.svc-row {
+    width: 100%;
+    align: left middle;
+}
+
+/* ── Name ── */
+.svc-name {
+    width: 16;
+    color: #ffcc00;
+}
+
+/* ── Status: running ── */
+.svc-state-running {
+    width: 50;
+    color: #00ff00;
+    text-align: center;
+}
+
+/* ── Status: exited ── */
+.svc-state-exited {
+    width: 50;
+    color: #ff0000;
+    text-align: center;
+}
+
+/* ── Status: paused ── */
+.svc-state-paused {
+    width: 50;
+    color: #ffcc00;
+    text-align: center;
+}
+
+/* ── Status: dead ── */
+.svc-state-dead {
+    width: 50;
+    color: #ff0000;
+    text-align: center;
+}
+
+/* ── Status: pending ── */
+.svc-state-pending {
+    width: 50;
+    color: #ffcc00;
+    text-align: center;
+}
+
+/* ── Address / URL ── */
+.svc-url {
+    width: 55;
+    color: #660000;
+    text-align: center;
+}
+
+Switch {
+    background: #0d0000;
+    border: tall #660000;
+    min-width: 6;
+    margin: 0 1;
+}
+
+Switch.-on {
+    background: #003300;
+    border: tall #00ff00;
+}
+
+Switch > .switch-slider {
+    color: #cc0000;
+}
+
+Switch.-on > .switch-slider {
+    color: #00ff00;
+}
+
+#main-container,
+#github-container,
+#result-container,
+#hosting-container,
+#services-container {
+    width: 100%;
+    height: 100%;
+}
+"""
+
+
+class GhostProviderApp(App):
+    CSS = CYBERPUNK_CSS
+    TITLE = "ghostprovider"
+    SUB_TITLE = "⎈"
+
+    SCREENS = {
+        "main": MainScreen,
+        "analysis": AnalysisScreen,
+        "github": GithubScreen,
+        "services": ServiceListScreen,
+    }
+
+    BINDINGS = [
+        Binding("ctrl+c", "quit", "Quit", priority=True),
+    ]
+
+    def on_mount(self) -> None:
+        self.push_screen("main")
+
+
+if __name__ == "__main__":
+    app = GhostProviderApp()
+    app.run()
