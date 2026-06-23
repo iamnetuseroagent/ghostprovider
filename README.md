@@ -111,36 +111,6 @@ GhostProvider analyzes each GitHub repo and returns a score:
 
 <br>
 
-## &#x1F3F0; Architecture
-
-```
-ghostprovider.sh
-       |
-ghostprovider/__main__.py
-       |
-ghostprovider/app.py          TUI Application (Textual)
-       |
-ghostprovider/screens.py      All screens & modals
-       |
-ghostprovider/analyzer.py     System analysis & fingerprinting
-       |
-ghostprovider/hoster.py       Deployment engine (Docker)
-       |
-ghostprovider/services.py     Container management
-       |
-ghostprovider/installer.py    Missing tool installer
-```
-
-<br>
-
-## &#x1F9F0; Tech Stack
-
-- **[Textual](https://textual.textualize.io/)** &mdash; TUI framework
-- **[Docker](https://docker.com)** &mdash; Container runtime
-- **[Python](https://python.org)** &mdash; Core language
-
-<br>
-
 ## &#x1F91D; Contributing
 
 Pull requests are welcome. For major changes, open an issue first.
