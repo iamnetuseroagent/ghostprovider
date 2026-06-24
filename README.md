@@ -40,23 +40,10 @@ Analyze your system, discover services, deploy GitHub repos as Docker containers
 
 ## Installation
 
-### Arch Linux
-
 ```bash
 git clone https://github.com/iamnetuseroagent/ghostprovider.git
 cd ghostprovider
 makepkg -si
-```
-
-### Manual
-
-```bash
-git clone https://github.com/iamnetuseroagent/ghostprovider.git
-cd ghostprovider
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-./ghostprovider.sh
 ```
 
 ### Dependencies
