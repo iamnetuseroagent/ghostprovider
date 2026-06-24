@@ -16,6 +16,7 @@ from typing import Any, Callable
 import requests
 
 from ghostprovider.services import _parse_host_port
+from ghostprovider.state import register as _register_state
 
 
 @dataclass
@@ -1868,9 +1869,9 @@ def host_project(analysis: RepoAnalysis, port: int = 0,
                 strategy_result.urls = [f"http://localhost:{port}"]
             if verify:
                 strategy_result = verify_deployment(strategy_result)
-            if strategy_result.healthy:
-                return strategy_result
-            if strategy_result.urls and strategy_result.container_ids:
+            if strategy_result.healthy or (strategy_result.urls and strategy_result.container_ids):
+                for cid in strategy_result.container_ids:
+                    _register_state(cid, str(project_dir), repo_url)
                 return strategy_result
             should_cleanup = True
             msg = strategy_result.errors[0] if strategy_result.errors else "unknown error"

@@ -100,6 +100,8 @@ def list_containers(all_containers: bool = False) -> list[ContainerInfo]:
                 ))
             except (json.JSONDecodeError, KeyError):
                 continue
+        from ghostprovider.state import migrate_old_containers
+        migrate_old_containers(containers)
         return containers
     except (subprocess.TimeoutExpired, FileNotFoundError):
         return []
@@ -259,14 +261,16 @@ def _remove_clone_dir(clone_path: str) -> None:
 
 def remove_container(name: str) -> str:
     """Force-remove a container by name and delete its cloned repo."""
-    # Read clone path label before removing the container
-    clone_path = get_container_label(name, "ghostprovider.clone_path")
+    # Try label first, then fall back to persistent state (covers old containers)
+    from ghostprovider.state import get_clone_path, unregister as _unregister_state
+    clone_path = get_container_label(name, "ghostprovider.clone_path") or get_clone_path(name)
     try:
         result = subprocess.run(
             ["docker", "rm", "-f", name],
             capture_output=True, text=True, timeout=30,
         )
         if result.returncode == 0:
+            _unregister_state(name)
             if clone_path:
                 _remove_clone_dir(clone_path)
             return f"Container '{name}' removed successfully"
