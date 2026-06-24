@@ -234,6 +234,10 @@ class MainScreen(Screen):
             Center(
                 Button("☰  MANAGE ACTIVE SERVICES  ☰", id="btn-services", variant="default"),
             ),
+            Static("", classes="spacer"),
+            Center(
+                Static("[dim]Check for updates from GitHub[/dim]", id="update-label"),
+            ),
             Center(
                 Button("⟳  UPDATE  ⟳", id="btn-update", variant="default"),
             ),

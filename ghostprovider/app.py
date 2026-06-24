@@ -322,6 +322,16 @@ Button.svc-rm-btn:hover {
 #services-list {
     background: #000;
 }
+
+.spacer {
+    height: 2;
+}
+
+#update-label {
+    color: #660000;
+    text-style: dim;
+    padding: 0 0 0 0;
+}
 """
 
 
