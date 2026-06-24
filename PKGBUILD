@@ -1,4 +1,4 @@
-# Maintainer: iamusernet <iamusernet@users.noreply.github.com>
+# Maintainer: iamnetuseroagent <iamnetuseroagent@users.noreply.github.com>
 
 pkgname=ghostprovider
 pkgver=1.0.0
@@ -15,13 +15,18 @@ sha256sums=('SKIP')
 package() {
   cd "$srcdir/$pkgname"
 
-  install -Dm755 ghostprovider.sh "$pkgdir/usr/bin/ghostprovider"
+  install -dm755 "$pkgdir/usr/bin"
+  cat > "$pkgdir/usr/bin/ghostprovider" << 'EOF'
+#!/bin/bash
+exec /opt/ghostprovider/.venv/bin/python3 -m ghostprovider "$@"
+EOF
+  chmod 755 "$pkgdir/usr/bin/ghostprovider"
+
   install -d "$pkgdir/opt/$pkgname"
 
   cp -r ghostprovider "$pkgdir/opt/$pkgname/"
   cp pyproject.toml "$pkgdir/opt/$pkgname/"
 
   python -m venv "$pkgdir/opt/$pkgname/.venv"
-  . "$pkgdir/opt/$pkgname/.venv/bin/activate"
-  pip install --no-cache-dir -e "$pkgdir/opt/$pkgname"
+  "$pkgdir/opt/$pkgname/.venv/bin/pip" install --no-cache-dir "$pkgdir/opt/$pkgname"
 }
