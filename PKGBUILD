@@ -1,5 +1,3 @@
-# Maintainer: iamnetuseroagent <iamnetuseroagent@users.noreply.github.com>
-
 pkgname=ghostprovider
 pkgver=1.0.0
 pkgrel=1

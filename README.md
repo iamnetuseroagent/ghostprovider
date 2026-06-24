@@ -8,7 +8,6 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-ff9900?style=for-the-badge&logo=python&logoColor=white&labelColor=111)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-ff9900?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=111)](LICENSE)
-[![AUR](https://img.shields.io/badge/AUR-ghostprovider-ff9900?style=for-the-badge&logo=arch-linux&logoColor=white&labelColor=111)](https://aur.archlinux.org)
 [![Docker](https://img.shields.io/badge/Docker-ready-ff9900?style=for-the-badge&logo=docker&logoColor=white&labelColor=111)](https://docker.com)
 [![Textual](https://img.shields.io/badge/Built%20with-Textual-ff9900?style=for-the-badge&logo=python&logoColor=white&labelColor=111)](https://textual.textualize.io)
 
@@ -35,17 +34,18 @@ Analyze your system, discover services, deploy GitHub repos as Docker containers
 - **Service Fingerprinting** &mdash; Detect 45+ self-hosted services (Jellyfin, SearXNG, Grafana, Home Assistant, Pi-hole, and more) by fingerprinting HTTP responses.
 - **GitHub Repo Analysis** &mdash; Paste any GitHub URL. GhostProvider checks for Dockerfile, docker-compose, dependency files, scans source code for HTTP servers, and computes a host score (0&ndash;100).
 - **One-Click Deploy** &mdash; Deploy compatible repos as Docker containers. Supports Python, Node.js, Go, Rust, static HTML, and Docker Compose projects with automatic port remapping.
-- **AUR Package** &mdash; Native Arch Linux package available on AUR.
 - **Container Management** &mdash; Start, stop, restart, and remove containers from the TUI.
 
 <br>
 
 ## Installation
 
-### AUR (Arch Linux)
+### Arch Linux
 
 ```bash
-yay -S ghostprovider
+git clone https://github.com/iamnetuseroagent/ghostprovider.git
+cd ghostprovider
+makepkg -si
 ```
 
 ### Manual
