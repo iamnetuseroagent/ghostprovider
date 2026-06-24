@@ -1,4 +1,4 @@
-"""Persistent deployment state — maps container IDs to clone paths."""
+"""Persistent deployment state — maps container names to clone paths."""
 
 import json
 import os
@@ -30,23 +30,31 @@ def save(state: dict[str, dict[str, str]]) -> None:
         pass
 
 
-def register(container_id: str, clone_path: str, repo_url: str) -> None:
+def register(container_name: str, clone_path: str, repo_url: str) -> None:
     state = load()
-    state[container_id] = {"clone_path": clone_path, "repo_url": repo_url}
+    state[container_name] = {"clone_path": clone_path, "repo_url": repo_url}
     save(state)
 
 
-def unregister(container_id: str) -> None:
+def unregister(container_name: str) -> None:
     state = load()
-    state.pop(container_id, None)
+    state.pop(container_name, None)
     save(state)
 
 
-def get_clone_path(container_id: str) -> str | None:
+def get_clone_path(container_name: str) -> str | None:
     state = load()
-    entry = state.get(container_id)
+    entry = state.get(container_name)
     if entry and os.path.isdir(entry.get("clone_path", "")):
         return entry["clone_path"]
+    return None
+
+
+def _find_by_repo_url(repo_url: str) -> str | None:
+    state = load()
+    for entry in state.values():
+        if entry.get("repo_url") == repo_url and os.path.isdir(entry.get("clone_path", "")):
+            return entry["clone_path"]
     return None
 
 
@@ -57,8 +65,8 @@ def migrate_old_containers(containers: list) -> None:
     for c in containers:
         clone_path = (c.labels or {}).get("ghostprovider.clone_path", "")
         repo_url = (c.labels or {}).get("ghostprovider.repo", "")
-        if c.id not in state and (clone_path or repo_url):
-            state[c.id] = {"clone_path": clone_path, "repo_url": repo_url}
+        if c.name not in state and (clone_path or repo_url):
+            state[c.name] = {"clone_path": clone_path, "repo_url": repo_url}
             changed = True
     if changed:
         save(state)

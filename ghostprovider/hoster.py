@@ -1870,8 +1870,10 @@ def host_project(analysis: RepoAnalysis, port: int = 0,
             if verify:
                 strategy_result = verify_deployment(strategy_result)
             if strategy_result.healthy or (strategy_result.urls and strategy_result.container_ids):
+                from ghostprovider.services import _container_name_from_id
                 for cid in strategy_result.container_ids:
-                    _register_state(cid, str(project_dir), repo_url)
+                    name = _container_name_from_id(cid) or cid
+                    _register_state(name, str(project_dir), repo_url)
                 return strategy_result
             should_cleanup = True
             msg = strategy_result.errors[0] if strategy_result.errors else "unknown error"

@@ -248,6 +248,19 @@ def wait_container_ready(name: str, timeout: int = 60) -> bool:
     return False
 
 
+def _container_name_from_id(container_id: str) -> str | None:
+    try:
+        r = subprocess.run(
+            ["docker", "inspect", "--format", "{{.Name}}", container_id],
+            capture_output=True, text=True, timeout=5,
+        )
+        if r.returncode == 0:
+            return r.stdout.strip().lstrip("/")
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+    return None
+
+
 def _remove_clone_dir(clone_path: str) -> None:
     """Remove cloned repository directory from disk."""
     import shutil
@@ -261,9 +274,15 @@ def _remove_clone_dir(clone_path: str) -> None:
 
 def remove_container(name: str) -> str:
     """Force-remove a container by name and delete its cloned repo."""
-    # Try label first, then fall back to persistent state (covers old containers)
-    from ghostprovider.state import get_clone_path, unregister as _unregister_state
-    clone_path = get_container_label(name, "ghostprovider.clone_path") or get_clone_path(name)
+    # Try label first, then persistent state, then fall back to repo URL lookup
+    from ghostprovider.state import get_clone_path, _find_by_repo_url, unregister as _unregister_state
+    clone_path = get_container_label(name, "ghostprovider.clone_path")
+    if not clone_path:
+        clone_path = get_clone_path(name)
+    if not clone_path:
+        repo_url = get_container_label(name, "ghostprovider.repo") or ""
+        if repo_url:
+            clone_path = _find_by_repo_url(repo_url)
     try:
         result = subprocess.run(
             ["docker", "rm", "-f", name],
