@@ -323,13 +323,8 @@ Button.svc-rm-btn:hover {
     background: #000;
 }
 
-.spacer {
-    height: 2;
-}
-
-#update-label {
-    color: #ffcc00;
-    padding: 0 0 0 0;
+#main-container Button {
+    width: 40;
 }
 """
 
