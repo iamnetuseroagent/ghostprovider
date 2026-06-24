@@ -900,6 +900,7 @@ class HostingScreen(Screen):
             main = self.app.get_screen("main")
             main.query_one("#btn-analyze", Button).focus()
             self.app.switch_screen("main")
+            main.call_after_refresh(main._refresh)
 
 
 # ── Modals ──────────────────────────────────────────────────────────
