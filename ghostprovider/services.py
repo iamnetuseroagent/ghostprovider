@@ -261,6 +261,22 @@ def _container_name_from_id(container_id: str) -> str | None:
     return None
 
 
+def _find_clone_on_disk(repo_url: str) -> str | None:
+    """Scan /tmp/ghost_* directories for a git repo matching the URL."""
+    import glob
+    for d in glob.glob("/tmp/ghost_*"):
+        git_config = os.path.join(d, ".git", "config")
+        if os.path.isfile(git_config):
+            try:
+                with open(git_config, encoding="utf-8", errors="replace") as f:
+                    for line in f:
+                        if repo_url in line:
+                            return d
+            except OSError:
+                pass
+    return None
+
+
 def _remove_clone_dir(clone_path: str) -> None:
     """Remove cloned repository directory from disk."""
     import shutil
@@ -274,8 +290,8 @@ def _remove_clone_dir(clone_path: str) -> None:
 
 def remove_container(name: str) -> str:
     """Force-remove a container by name and delete its cloned repo."""
-    # Try label first, then persistent state, then fall back to repo URL lookup
     from ghostprovider.state import get_clone_path, _find_by_repo_url, unregister as _unregister_state
+    
     clone_path = get_container_label(name, "ghostprovider.clone_path")
     if not clone_path:
         clone_path = get_clone_path(name)
@@ -283,6 +299,11 @@ def remove_container(name: str) -> str:
         repo_url = get_container_label(name, "ghostprovider.repo") or ""
         if repo_url:
             clone_path = _find_by_repo_url(repo_url)
+    if not clone_path:
+        repo_url = get_container_label(name, "ghostprovider.repo") or ""
+        if repo_url:
+            clone_path = _find_clone_on_disk(repo_url)
+
     try:
         result = subprocess.run(
             ["docker", "rm", "-f", name],
@@ -308,8 +329,10 @@ def get_container_label(container_name: str, key: str) -> str | None:
             ["docker", "inspect", "--format", "{{index .Config.Labels \"" + key + "\"}}", container_name],
             capture_output=True, text=True, timeout=5,
         )
-        if r.returncode == 0 and r.stdout.strip():
-            return r.stdout.strip()
+        if r.returncode == 0:
+            val = r.stdout.strip()
+            if val and val != "<no value>":
+                return val
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
     return None
