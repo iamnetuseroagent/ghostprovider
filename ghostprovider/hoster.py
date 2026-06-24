@@ -2032,6 +2032,7 @@ def _build_and_run_docker(project_dir: Path, port: int, repo_url: str = "",
     run_args.extend(_build_volume_args(volume_mounts))
     if repo_url:
         run_args += ["--label", f"ghostprovider.repo={repo_url}"]
+        run_args += ["--label", f"ghostprovider.clone_path={project_dir}"]
     run_args.append(tag)
     result = subprocess.run(run_args, capture_output=True, text=True, check=True, timeout=30)
     return result.stdout.strip()[:12]
@@ -2229,6 +2230,7 @@ CMD ["sh", "-c", "{cmd}"]
     run_args.extend(_build_volume_args(volume_mounts))
     if repo_url:
         run_args += ["--label", f"ghostprovider.repo={repo_url}"]
+        run_args += ["--label", f"ghostprovider.clone_path={project_dir}"]
     run_args.append(tag)
     result = subprocess.run(run_args, capture_output=True, text=True, check=True, timeout=30)
     return result.stdout.strip()[:12]
@@ -2321,6 +2323,7 @@ CMD ["sh", "-c", "{serve_cmd_full}"]
     run_args.extend(_build_volume_args(volume_mounts))
     if repo_url:
         run_args += ["--label", f"ghostprovider.repo={repo_url}"]
+        run_args += ["--label", f"ghostprovider.clone_path={project_dir}"]
     run_args.append(tag)
     result = subprocess.run(run_args, capture_output=True, text=True, check=True, timeout=30)
     return result.stdout.strip()[:12]
@@ -2400,6 +2403,7 @@ CMD ["sh", "-c", "{cmd}"]
     run_args.extend(_build_volume_args(volume_mounts))
     if repo_url:
         run_args += ["--label", f"ghostprovider.repo={repo_url}"]
+        run_args += ["--label", f"ghostprovider.clone_path={project_dir}"]
     run_args.append(tag)
     result = subprocess.run(run_args, capture_output=True, text=True, check=True, timeout=30)
     return result.stdout.strip()[:12]
@@ -2458,6 +2462,7 @@ CMD ["/app/server"]
     run_args.extend(_build_volume_args(volume_mounts))
     if repo_url:
         run_args += ["--label", f"ghostprovider.repo={repo_url}"]
+        run_args += ["--label", f"ghostprovider.clone_path={project_dir}"]
     run_args.append(tag)
     result = subprocess.run(run_args, capture_output=True, text=True, check=True, timeout=30)
     return result.stdout.strip()[:12]

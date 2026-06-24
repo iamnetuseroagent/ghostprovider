@@ -1,6 +1,7 @@
 """Docker service discovery and management for ghostprovider."""
 
 import json
+import os
 import re
 import socket
 import subprocess
@@ -245,14 +246,29 @@ def wait_container_ready(name: str, timeout: int = 60) -> bool:
     return False
 
 
+def _remove_clone_dir(clone_path: str) -> None:
+    """Remove cloned repository directory from disk."""
+    import shutil
+    if not clone_path or not os.path.isdir(clone_path):
+        return
+    try:
+        shutil.rmtree(clone_path, ignore_errors=True)
+    except Exception:
+        pass
+
+
 def remove_container(name: str) -> str:
-    """Force-remove a container by name."""
+    """Force-remove a container by name and delete its cloned repo."""
+    # Read clone path label before removing the container
+    clone_path = get_container_label(name, "ghostprovider.clone_path")
     try:
         result = subprocess.run(
             ["docker", "rm", "-f", name],
             capture_output=True, text=True, timeout=30,
         )
         if result.returncode == 0:
+            if clone_path:
+                _remove_clone_dir(clone_path)
             return f"Container '{name}' removed successfully"
         error = result.stderr.strip() or "unknown error"
         return f"Failed to remove '{name}': {error}"
