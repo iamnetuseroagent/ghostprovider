@@ -236,10 +236,10 @@ class MainScreen(Screen):
             ),
             Static("", classes="spacer"),
             Center(
-                Static("[dim]Check for updates from GitHub[/dim]", id="update-label"),
+                Static("[bold yellow]Check for updates from GitHub[/bold yellow]", id="update-label"),
             ),
             Center(
-                Button("⟳  UPDATE  ⟳", id="btn-update", variant="default"),
+                Button("          UPDATE          ", id="btn-update", variant="default"),
             ),
             Static(
                 "[dim red]────────────────────────────────[/dim red]\n"

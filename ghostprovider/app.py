@@ -328,8 +328,7 @@ Button.svc-rm-btn:hover {
 }
 
 #update-label {
-    color: #660000;
-    text-style: dim;
+    color: #ffcc00;
     padding: 0 0 0 0;
 }
 """
