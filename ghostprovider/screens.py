@@ -1227,8 +1227,8 @@ class ServiceListScreen(Screen):
         ("escape", "pop_screen"),
         ("left", "pop_screen"),
         ("enter", "toggle_selected"),
+        ("e", "toggle_selected"),
         ("r", "restart_selected"),
-        ("a", "toggle_all"),
     ]
 
     def __init__(self, **kwargs):
@@ -1239,6 +1239,8 @@ class ServiceListScreen(Screen):
         self._refresh_lock = asyncio.Lock()
         self._fingerprints: dict[str, str] = {}
         self._fingerprint_cache_ports: set[int] = set()
+        self._color_idx: int = 0
+        self._blink_on: bool = True
 
     def action_pop_screen(self) -> None:
         self.app.pop_screen()
@@ -1248,14 +1250,12 @@ class ServiceListScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Vertical(
-            Static("[bold red]══ ACTIVE SERVICES ══[/bold red]", id="services-title"),
+            Static("[bold #ffcc00]════ ACTIVE SERVICES ════[/bold #ffcc00]", id="services-title"),
             ListView(id="services-list"),
             Static(
-                "[dim red]↑↓[/dim red] [dim]navigate  |  [/dim]"
-                "[dim red]Enter[/dim red] [dim]toggle  |  [/dim]"
-                "[dim red]R[/dim red] [dim]restart  |  [/dim]"
-                "[dim red]A[/dim red] [dim]filter  |  [/dim]"
-                "[dim red]← Esc[/dim red] [dim]back[/dim]",
+                "[bold #ff0066]┌──────────────────────────────────────────────────────────────────────┐[/bold #ff0066]\n"
+                "[bold #ff0066]│[/bold #ff0066]  [bold #00ffff]↑↓[/bold #00ffff] [dim]NAVIGATE[/dim]  [bold #cc00ff]Enter/E[/bold #cc00ff] [dim]TOGGLE[/dim]  [bold #ff6600]R[/bold #ff6600] [dim]RESTART[/dim]  [bold #ff0066]← Esc[/bold #ff0066] [dim]BACK[/dim]  [bold #ff0066]│[/bold #ff0066]\n"
+                "[bold #ff0066]└──────────────────────────────────────────────────────────────────────┘[/bold #ff0066]",
                 id="services-hint",
             ),
             id="services-container",
@@ -1263,6 +1263,7 @@ class ServiceListScreen(Screen):
 
     def on_mount(self) -> None:
         _safe_task(self._refresh())
+        self.set_interval(0.6, self._blink_animation)
 
     async def _refresh(self, show_all: bool | None = None) -> None:
         async with self._refresh_lock:
@@ -1273,7 +1274,41 @@ class ServiceListScreen(Screen):
                 None, list_containers, show_all
             )
             self._pending.clear()
-            self._rebuild_rows()
+            try:
+                self._rebuild_rows()
+            except Exception as e:
+                if hasattr(self, "app") and self.app:
+                    self.app.notify(f"Rebuild error: {e}", severity="error", timeout=5)
+
+    def _blink_animation(self) -> None:
+        self._blink_on = not self._blink_on
+        if not hasattr(self, "_containers") or not self._containers:
+            return
+        try:
+            list_view = self.query_one("#services-list", ListView)
+        except Exception:
+            return
+        for i, child in enumerate(list_view.children):
+            if i >= len(self._containers):
+                break
+            c = self._containers[i]
+            if c.name in self._pending:
+                continue
+            try:
+                row = child.query_one(".svc-row")
+                ind = row.query_one(f"#svc-ind-{i}")
+                if c.state == "running":
+                    if self._blink_on:
+                        ind.update("[bold #00ff00]◉[/bold #00ff00]")
+                    else:
+                        ind.update("[bold #003300]◉[/bold #003300]")
+                elif c.state == "exited":
+                    if self._blink_on:
+                        ind.update("[bold #ff3333]◎[/bold #ff3333]")
+                    else:
+                        ind.update("[bold #330000]◎[/bold #330000]")
+            except Exception:
+                pass
 
     def _rebuild_rows(self) -> None:
         list_view = self.query_one("#services-list", ListView)
@@ -1281,11 +1316,11 @@ class ServiceListScreen(Screen):
 
         if not self._containers:
             list_view.append(
-                ListItem(Static("  No containers or Docker unavailable"))
+                ListItem(Static("[dim]  No containers or Docker unavailable[/dim]"))
             )
             return
 
-        for i, c in enumerate(self._containers, 1):
+        for i, c in enumerate(self._containers):
             is_pending = c.name in self._pending
             state_text = self._pending.get(c.name, c.state)
             state_cls = "svc-status-pending" if is_pending else f"svc-status-{c.state}"
@@ -1295,21 +1330,20 @@ class ServiceListScreen(Screen):
                 switch_value = c.state == "running"
 
             urls = container_urls(c.ports)
-            url_text = urls[0] if urls else ""
+            url_text = urls[0] if urls else "[dim]—[/dim]"
             port = int(urls[0].rsplit(":", 1)[-1]) if urls else 0
 
-            # HTTP-fingerprint the container to get the real service name.
-            # Only accept body-matched signatures (confidence >= 75).
-            # Server-header fallbacks (Python HTTP Server, Nginx as proxy, etc.)
-            # are misleading — fall back to image name instead.
             svc_name = self._fingerprints.get(c.name) or self._fingerprints.get(str(port))
             if not svc_name and port and port not in self._fingerprint_cache_ports:
                 self._fingerprint_cache_ports.add(port)
-                fp = fingerprint_port(port)
-                if fp and fp.confidence >= 75:
-                    svc_name = fp.service_name
-                    self._fingerprints[c.name] = svc_name
-                    self._fingerprints[str(port)] = svc_name
+                try:
+                    fp = fingerprint_port(port)
+                    if fp and fp.confidence >= 75:
+                        svc_name = fp.service_name
+                        self._fingerprints[c.name] = svc_name
+                        self._fingerprints[str(port)] = svc_name
+                except Exception:
+                    pass
 
             if svc_name:
                 display_name = svc_name
@@ -1318,10 +1352,24 @@ class ServiceListScreen(Screen):
             else:
                 display_name = c.name
 
-            buttons = [Button("██", id=f"svc-rm-{c.name}", classes="svc-rm-btn")]
+            if is_pending:
+                indicator = "[bold yellow]⟳[/bold yellow]"
+            elif c.state == "running":
+                indicator = "[bold #00ff00]◉[/bold #00ff00]"
+            elif c.state == "exited":
+                indicator = "[bold #ff3333]◎[/bold #ff3333]"
+            elif c.state == "paused":
+                indicator = "[bold yellow]◐[/bold yellow]"
+            else:
+                indicator = "[dim]○[/dim]"
+
+            ind_id = f"svc-ind-{i}"
+
+            buttons = [Button("⊘", id=f"svc-rm-{c.name}", classes="svc-rm-btn")]
 
             item = ListItem(
                 Horizontal(
+                    Static(indicator, id=ind_id, classes="svc-ind"),
                     Static(display_name, classes="svc-name"),
                     Static(state_text, classes=f"svc-status {state_cls}"),
                     Static(url_text, classes="svc-url"),

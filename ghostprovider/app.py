@@ -223,50 +223,90 @@ BootSequence {
 
 #services-hint {
     align: center middle;
-    color: #660000;
-    margin: 1 0;
+    color: #ff0066;
+    margin: 0 0 1 0;
+    height: 3;
+}
+
+#services-title {
+    content-align: center middle;
+    text-align: center;
+    height: 3;
+    color: #ffcc00;
+    text-style: bold;
 }
 
 #services-list {
-    margin: 0 2;
+    margin: 0 1;
     height: 1fr;
+    background: #000;
+}
+
+#services-list > ListItem {
+    height: 3;
+    padding: 0 0;
+}
+
+#services-list > ListItem.--highlight {
+    background: #1a0020;
+    border: tall #ff0066;
 }
 
 /* ── Row ── */
 .svc-row {
     width: 100%;
+    height: 100%;
     align: left middle;
+}
+
+/* ── Indicator ── */
+.svc-ind {
+    width: 3;
+    min-width: 3;
 }
 
 /* ── Name ── */
 .svc-name {
-    width: 1fr;
-    max-width: 40;
-    min-width: 16;
-    color: #ffcc00;
+    width: 30;
+    min-width: 20;
+    color: #00ffff;
+    text-style: bold;
     padding: 0 1;
+}
+
+#services-list > ListItem.--highlight .svc-name {
+    color: #ffffff;
+}
+
+#services-list > ListItem.--highlight .svc-status {
+    color: #ffffff;
+}
+
+#services-list > ListItem.--highlight .svc-url {
+    color: #ffffff;
 }
 
 /* ── Status ── */
 .svc-status {
-    width: 12;
+    width: 14;
     text-align: center;
+    text-style: bold;
 }
 
-.svc-status-running   { color: #00ff00; }
-.svc-status-exited    { color: #ff0000; }
-.svc-status-paused    { color: #ffcc00; }
-.svc-status-dead      { color: #ff0000; }
-.svc-status-created   { color: #666666; }
+.svc-status-running    { color: #00ff00; }
+.svc-status-exited     { color: #ff3333; }
+.svc-status-paused     { color: #ffcc00; }
+.svc-status-dead       { color: #ff0000; }
+.svc-status-created    { color: #666666; }
 .svc-status-restarting { color: #ffcc00; }
-.svc-status-removing  { color: #ff0000; }
-.svc-status-pending   { color: #ffcc00; }
+.svc-status-removing   { color: #ff0066; }
+.svc-status-pending    { color: #ff6600; }
 
 /* ── Address / URL ── */
 .svc-url {
-    width: 2fr;
-    min-width: 20;
-    color: #660000;
+    width: 1fr;
+    min-width: 24;
+    color: #cc00ff;
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -276,37 +316,39 @@ BootSequence {
 /* ── Toggle ── */
 Switch.svc-toggle {
     width: auto;
-    min-width: 4;
-    margin: 0 1;
-    background: #000000;
-    border: none;
+    min-width: 6;
+    margin: 0 2;
+    background: #330000;
+    border: tall #ff3333;
 }
 
 Switch.svc-toggle.-on {
-    background: #000000;
-    border: none;
+    background: #003300;
+    border: tall #00ff00;
 }
 
 Switch.svc-toggle .switch--slider {
-    color: #000000;
-    background: #000000;
+    color: #ffffff;
+    background: #ff3333;
 }
 
 Switch.svc-toggle.-on .switch--slider {
-    color: #cc0000;
-    background: #000000;
+    color: #ffffff;
+    background: #00ff00;
 }
 
+/* ── Remove button ── */
 Button.svc-rm-btn {
-    color: yellow;
-    background: #000000;
-    border: none;
+    color: #ff3333;
+    background: #1a0000;
+    border: tall #ff0066;
     padding: 0 1;
-    min-width: 2;
+    min-width: 4;
 }
 
 Button.svc-rm-btn:hover {
-    color: ansi_bright_yellow;
+    color: #000000;
+    background: #ff0066;
 }
 
 #main-container,
@@ -324,7 +366,7 @@ Button.svc-rm-btn:hover {
 }
 
 #main-container Button {
-    width: 40;
+    width: 50;
 }
 """
 
