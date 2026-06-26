@@ -428,7 +428,6 @@ body::before {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
   padding: 4px 12px;
   border-radius: 100px;
   background: rgba(255, 153, 0, 0.06);
@@ -438,6 +437,7 @@ body::before {
   color: var(--accent-dim);
   letter-spacing: 0.03em;
   transition: all 0.3s ease;
+  align-self: center;
 }
 
 .visitor-badge:hover {
@@ -511,6 +511,10 @@ body::before {
         <div class="profile-col">
           <div class="nickname">GHOST PROVIDER</div>
           <div class="tagline">Your data is your life.</div>
+          <div class="visitor-badge" id="visitor-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span><span class="visitor-count" id="visitor-count">...</span> views</span>
+          </div>
           <div class="logo-wrap">
             <img src="avatar.png" alt="Ghost Provider" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">
           </div>
@@ -537,10 +541,6 @@ body::before {
 
       <div class="footer">
         <span>GHOST PROVIDER / <strong>v1.0.0</strong></span>
-        <div class="visitor-badge" id="visitor-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          <span><span class="visitor-count" id="visitor-count">...</span> views</span>
-        </div>
       </div>
     </section>
 
