@@ -633,8 +633,13 @@ body::before {
   });
 
   var counterUrl = 'https://api.counterapi.dev/v1/iamnetuser/ghostprovider/';
-  if (!localStorage.getItem('gp_visited_gp')) {
-    localStorage.setItem('gp_visited_gp', '1');
+  var EXPIRE_MS = 30 * 24 * 60 * 60 * 1000;
+  var stored = null;
+  try { stored = JSON.parse(localStorage.getItem('gp_v_gp')); } catch(e) {}
+  var now = Date.now();
+  if (!stored || (now - stored.ts) > EXPIRE_MS) {
+    var id = Math.random().toString(36).slice(2) + now.toString(36);
+    localStorage.setItem('gp_v_gp', JSON.stringify({ id: id, ts: now }));
     fetch(counterUrl + 'up');
   }
   fetch(counterUrl)
