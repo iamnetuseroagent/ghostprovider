@@ -632,7 +632,12 @@ body::before {
     });
   });
 
-  fetch('https://api.counterapi.dev/v1/iamnetuser/ghostprovider/up')
+  var counterUrl = 'https://api.counterapi.dev/v1/iamnetuser/ghostprovider/';
+  if (!localStorage.getItem('gp_visited_gp')) {
+    localStorage.setItem('gp_visited_gp', '1');
+    fetch(counterUrl + 'up');
+  }
+  fetch(counterUrl)
     .then(function(r) { return r.json(); })
     .then(function(d) {
       document.getElementById('visitor-count').textContent = d.count || '0';
