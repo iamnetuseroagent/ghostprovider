@@ -54,15 +54,9 @@ makepkg -si
 
 ### Updating
 
-**If installed via git:**
 ```bash
 cd ghostprovider
 git pull
-```
-
-**If installed via pip:**
-```bash
-pip install --upgrade ghostprovider
 ```
 
 <br>
